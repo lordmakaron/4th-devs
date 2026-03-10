@@ -27,4 +27,4 @@ npm run lesson2:tool_use
 | `create_directory` | Create a directory (recursive) |
 | `file_info` | Get file/directory metadata |
 
-See `TOOLS.md` for full schemas and examples.
+See `definitions.ts` for full schemas. 
