@@ -2,16 +2,64 @@
 /**
  * S01E04 — Image Editing Agent (PHP)
  *
- * Autonomous agent that generates and edits images using Gemini via OpenRouter,
- * with quality verification through a vision model.
+ * CONCEPT
+ * -------
+ * An autonomous, self-correcting image editing agent. Instead of a single API
+ * call, an orchestrating LLM (the "brain") is given a set of tools and runs in
+ * a loop — deciding on each step what to do next — until the task is complete.
  *
- * Pipeline:
- *  1. Read workspace/style-guide.md for visual style reference
- *  2. Process user query (generate or edit images)
- *  3. Generate/edit images via Gemini (OpenRouter)
- *  4. Analyze results with vision model for quality
- *  5. Retry if blocking issues found (up to 2 retries)
- *  6. Save accepted images to workspace/output/
+ *   User query → Agent loop → [Tool calls <-> Results] → Final answer
+ *
+ * THREE MODELS, THREE ROLES
+ * -------------------------
+ *  - Orchestrator (gpt-4.1)                  — plans, reasons, calls tools
+ *  - Image generator (gemini-3.1-flash)      — produces/edits images from prompts
+ *  - Vision analyzer (gpt-4.1)               — evaluates generated images for quality
+ *
+ * The orchestrator never sees images directly — it delegates vision to the
+ * analyze_image tool and acts on the structured verdict it gets back.
+ *
+ * TOOLS
+ * -----
+ *  - read_file       Read text files (e.g. the style guide)
+ *  - list_directory   List files in workspace folders
+ *  - create_image     Call Gemini via OpenRouter to generate or edit images
+ *  - analyze_image    Send a result to the vision model for quality scoring
+ *
+ * AGENT LOOP
+ * ----------
+ * The Chat Completions API is stateless, so the full conversation history is
+ * resent every iteration. The LLM sees its previous tool calls and their results,
+ * allowing it to reason about what happened and decide what to do next.
+ *
+ *   while (steps < 50):
+ *       response = LLM(messages + tools)
+ *       if no tool_calls → return text (done)
+ *       for each tool_call: execute → append result to messages
+ *       loop back
+ *
+ * QUALITY SCORING (SELF-CORRECTION)
+ * ---------------------------------
+ * Image generation is unpredictable — wrong subject, broken anatomy, style
+ * violations, artifacts. The analyze_image tool acts as automated QA: the agent
+ * checks its own work before declaring it done.
+ *
+ *  - ACCEPT (good): minor polish notes are OK, agent stops and returns summary.
+ *  - RETRY (bad):   analysis returns blocking_issues + next_prompt_hints.
+ *                   Agent calls create_image again with a refined prompt
+ *                   informed by those hints (up to 2 retries, then stops).
+ *
+ *   create_image → analyze_image → ACCEPT? → done
+ *                                → RETRY?  → create_image (refined) → analyze again
+ *                                            (max 2 retries, then stop)
+ *
+ * TYPICAL EXECUTION FLOW
+ * ----------------------
+ *  1. Agent reads workspace/style-guide.md (monochrome concept art, 16:9, etc.)
+ *  2. Agent lists workspace/input/ to find the exact source filename
+ *  3. Agent calls create_image with prompt + reference image → saved to workspace/output/
+ *  4. Agent calls analyze_image → vision model returns ACCEPT or RETRY with issues
+ *  5. If RETRY, agent refines prompt and retries; if ACCEPT, returns summary
  */
 
 require __DIR__ . '/../../lib/init.php';
