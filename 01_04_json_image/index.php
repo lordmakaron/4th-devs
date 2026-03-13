@@ -61,14 +61,14 @@
  *  6. Agent reports the generated image path and prompt file path
  */
 
-require __DIR__ . '/../../lib/init.php';
+require __DIR__ . '/../../../lib/init.php';
 
 // =============================================================================
 // CONFIG
 // =============================================================================
 
-const WORKSPACE = __DIR__;
-const MAX_STEPS = 50;
+define('WORKSPACE', __DIR__);
+define('MAX_STEPS', 50);
 
 $orModel     = 'openai/gpt-4.1';
 $visionModel = 'openai/gpt-4.1';
@@ -828,7 +828,7 @@ $tools = getTools();
 logMsg('TOOLS', implode(', ', array_map(fn($t) => $t['function']['name'], $tools)), 'secondary');
 
 // Default query — can be overridden via CLI argument
-$query = $argv[1] ?? "Generate an image of a samurai warrior in battle stance using the template.json style";
+$query = "Generate an image of a samurai warrior in battle stance using the template.json style";
 
 logMsg('QUERY', $query, 'primary');
 
@@ -844,4 +844,4 @@ catch (Throwable $e)
     logMsg('ERROR', $e->getMessage(), 'danger');
 }
 
-require __DIR__ . '/../../lib/footer.php';
+require __DIR__ . '/../../../lib/footer.php';

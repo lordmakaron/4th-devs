@@ -63,14 +63,14 @@
  *  8. Agent reports the output PDF path
  */
 
-require __DIR__ . '/../../lib/init.php';
+require __DIR__ . '/../../../lib/init.php';
 
 // =============================================================================
 // CONFIG
 // =============================================================================
 
-const WORKSPACE = __DIR__;
-const MAX_STEPS = 50;
+define('WORKSPACE', __DIR__);
+define('MAX_STEPS', 50);
 
 $orModel     = 'openai/gpt-4.1';
 $visionModel = 'openai/gpt-4.1';
@@ -954,7 +954,7 @@ logMsg('VISION', $visionModel, 'secondary');
 $tools = getTools();
 logMsg('TOOLS', implode(', ', array_map(fn($t) => $t['function']['name'], $tools)), 'secondary');
 
-$query = $argv[1] ?? "Create a professional one-page report about AI trends in 2026 with key metrics and one illustration";
+$query = "Create a professional one-page report about AI trends in 2026 with key metrics and one illustration";
 
 logMsg('QUERY', $query, 'primary');
 
@@ -970,4 +970,4 @@ catch (Throwable $e)
     logMsg('ERROR', $e->getMessage(), 'danger');
 }
 
-require __DIR__ . '/../../lib/footer.php';
+require __DIR__ . '/../../../lib/footer.php';

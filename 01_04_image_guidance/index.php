@@ -68,14 +68,14 @@
  *  7. If RETRY, refines prompt; if ACCEPT, returns summary with image path
  */
 
-require __DIR__ . '/../../lib/init.php';
+require __DIR__ . '/../../../lib/init.php';
 
 // =============================================================================
 // CONFIG
 // =============================================================================
 
-const WORKSPACE = __DIR__;
-const MAX_STEPS = 50;
+define('WORKSPACE', __DIR__);
+define('MAX_STEPS', 50);
 
 $orModel     = 'openai/gpt-4.1';
 $visionModel = 'openai/gpt-4.1';
@@ -938,7 +938,7 @@ $tools = getTools();
 logMsg('TOOLS', implode(', ', array_map(fn($t) => $t['function']['name'], $tools)), 'secondary');
 
 // Default query — can be overridden via CLI argument
-$query = $argv[1] ?? "Generate a medieval knight in a walking pose using the cell-shaded style template";
+$query = "Generate a medieval knight in a walking pose using the cell-shaded style template";
 
 logMsg('QUERY', $query, 'primary');
 
@@ -954,4 +954,4 @@ catch (Throwable $e)
     logMsg('ERROR', $e->getMessage(), 'danger');
 }
 
-require __DIR__ . '/../../lib/footer.php';
+require __DIR__ . '/../../../lib/footer.php';

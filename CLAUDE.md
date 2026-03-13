@@ -11,9 +11,9 @@ Bootstrap-styled HTML logs.
 Every PHP example starts and ends with:
 
 ```php
-require __DIR__ . '/../../lib/init.php';
+require __DIR__ . '/../../../lib/init.php';
 // ... example code ...
-require __DIR__ . '/../../lib/footer.php';
+require __DIR__ . '/../../../lib/footer.php';
 ```
 
 ### lib/init.php provides:
@@ -113,7 +113,7 @@ function handleTool(string $name, array $args): array {
 ### 9. Agent Loop Pattern (Complex Examples)
 
 ```php
-const MAX_STEPS = 50;
+define('MAX_STEPS', 50);
 
 function runAgent(string $userMessage, array $tools): string {
     // system + user messages → loop:
@@ -122,14 +122,23 @@ function runAgent(string $userMessage, array $tools): string {
 }
 ```
 
-### 10. Image Tool Patterns (When Applicable)
+### 10. Constants
+
+Always use `define()`, never `const` at file scope:
+
+```php
+define('WORKSPACE', __DIR__);
+define('MAX_STEPS', 50);
+```
+
+### 11. Image Tool Patterns (When Applicable)
 
 - `create_image`: prompt → Gemini via OpenRouter → base64 data URL → save to workspace/output/
 - Reference images as `data:{mime};base64,{data}` in `image_url` content parts
 - `analyze_image`: vision model evaluates quality
 - Filenames with timestamps: `{name}_{timestamp}.{ext}`
 
-### 11. HTML-to-PDF (When Applicable)
+### 12. HTML-to-PDF (When Applicable)
 
 Use Chrome headless `--print-to-pdf` (no Puppeteer/npm needed):
 
@@ -137,14 +146,16 @@ Use Chrome headless `--print-to-pdf` (no Puppeteer/npm needed):
 - `--no-sandbox --print-background --no-pdf-header-footer`
 - Template CSS handles page layout (zero Chrome margins)
 
-### 12. Main Execution Block
+### 13. Main Execution Block
+
+Scripts run in a browser — hardcode the default query directly. Never use `$argv`.
 
 ```php
 logSection('S01E04 — Example Title');
 logMsg('MODEL', $orModel, 'secondary');
 
 $tools = getTools();  // if agent example
-$query = $argv[1] ?? "default query";
+$query = "default query hardcoded here";
 
 try {
     $finalAnswer = runAgent($query, $tools);
@@ -154,7 +165,7 @@ try {
     logMsg('ERROR', $e->getMessage(), 'danger');
 }
 
-require __DIR__ . '/../../lib/footer.php';
+require __DIR__ . '/../../../lib/footer.php';
 ```
 
 ## What NOT to Do
@@ -163,7 +174,8 @@ require __DIR__ . '/../../lib/footer.php';
 - Don't use classes/OOP — keep procedural
 - Don't modify JS files or workspace assets (shared between JS and PHP)
 - Don't create separate PHP config files — embed config in index.php
-- Don't add CLI output — everything renders as HTML in browser
+- Don't add CLI output — everything renders as HTML in browser; never use `$argv`
+- Don't use `const` at file scope — use `define()` instead
 - Don't duplicate what's already in lib/functions.php (especially callLLM, curlPost)
 
 ## Environment Variables (from .env)
